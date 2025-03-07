@@ -61,14 +61,47 @@ public:
 
 private:
   /// Add whatever helper functions and data members you need below
-
-
+  std::vector<T> list;
+  int m_;
+  PComparator c_;
 
 
 };
 
 // Add implementation of member functions here
+template <typename T, typename PComparator>
+Heap<T,PComparator>::Heap(int m, PComparator c){
+  m_ = m;
+  c_ = c;
+}
+template <typename T, typename PComparator>
+Heap<T, PComparator>::~Heap() {}
 
+template <typename T, typename PComparator>
+void Heap<T,PComparator>::push(const T& item){
+  list.push_back(item);
+
+  //heapify
+  int index = list.size()-1;
+  while(index > 0){
+    T& current = list[index];
+    T& parent = list[(index-1)/m_];
+    if(c_(current, parent)){
+      std::swap(current, parent);
+      index = (index-1)/m_;
+    } else {
+      break;
+    }
+  }
+}
+template <typename T, typename PComparator>
+bool Heap<T,PComparator>::empty() const{
+  return list.empty();
+}
+template <typename T, typename PComparator>
+size_t Heap<T,PComparator>::size() const{
+  return list.size();
+}
 
 // We will start top() for you to handle the case of 
 // calling top on an empty heap
@@ -81,14 +114,12 @@ T const & Heap<T,PComparator>::top() const
     // ================================
     // throw the appropriate exception
     // ================================
-
+    throw std::underflow_error("Heap is empty");
 
   }
   // If we get here we know the heap has at least 1 item
   // Add code to return the top element
-
-
-
+  return list[0];
 }
 
 
@@ -101,12 +132,31 @@ void Heap<T,PComparator>::pop()
     // ================================
     // throw the appropriate exception
     // ================================
-
+    throw std::underflow_error("Heap is empty");
 
   }
+  std::swap(list[0], list[list.size()-1]);
+  list.pop_back();
 
+  if (!empty()) {
+    int index = 0;
+    while (true) {
+      int smallest = index;
+      for (int i = 1; i <= m_; ++i) {
+        int childIndex = m_ * index + i;
+        if (childIndex < list.size() && c_(list[childIndex], list[smallest])) {
+          smallest = childIndex;
+        }
+      }
 
-
+      if (smallest != index) {
+        std::swap(list[index], list[smallest]);
+        index = smallest;
+      } else {
+        break;
+      }
+    }
+  }
 }
 
 
